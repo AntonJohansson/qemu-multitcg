@@ -6404,6 +6404,12 @@ static void x86_cpu_realizefn(DeviceState *dev, Error **errp)
     static bool ht_warned;
     unsigned requested_lbr_fmt;
 
+#ifdef TARGET_X86_64
+    tcg_ctx->long_bits = 64;
+#else
+    tcg_ctx->long_bits = 32;
+#endif
+
     /* Use pc-relative instructions in system-mode */
 #ifndef CONFIG_USER_ONLY
     cs->tcg_cflags |= CF_PCREL;
