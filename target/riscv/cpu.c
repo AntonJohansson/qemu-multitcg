@@ -880,6 +880,12 @@ static void riscv_cpu_realize(DeviceState *dev, Error **errp)
     int i, priv_version = -1;
     Error *local_err = NULL;
 
+#if defined(TARGET_RISCV64)
+    tcg_ctx->long_bits = 64;
+#else
+    tcg_ctx->long_bits = 32;
+#endif
+
     cpu_exec_realizefn(cs, &local_err);
     if (local_err != NULL) {
         error_propagate(errp, local_err);
