@@ -125,6 +125,12 @@ static void hppa_cpu_realizefn(DeviceState *dev, Error **errp)
     HPPACPUClass *acc = HPPA_CPU_GET_CLASS(dev);
     Error *local_err = NULL;
 
+#ifdef TARGET_HPPA64 || !defined(CONFIG_USER_ONLY)
+    tcg_ctx->long_bits = 64;
+#else
+    tcg_ctx->long_bits = 32;
+#endif
+
     cpu_exec_realizefn(cs, &local_err);
     if (local_err != NULL) {
         error_propagate(errp, local_err);
