@@ -1554,6 +1554,8 @@ static void arm_cpu_realizefn(DeviceState *dev, Error **errp)
     Error *local_err = NULL;
     bool no_aa32 = false;
 
+    tcg_ctx->long_bits = (arm_feature(env, ARM_FEATURE_AARCH64)) ? 64 : 32;
+
     /* Use pc-relative instructions in system-mode */
 #ifndef CONFIG_USER_ONLY
     cs->tcg_cflags |= CF_PCREL;
