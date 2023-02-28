@@ -459,6 +459,12 @@ static void mips_cpu_realizefn(DeviceState *dev, Error **errp)
     MIPSCPUClass *mcc = MIPS_CPU_GET_CLASS(dev);
     Error *local_err = NULL;
 
+#ifdef TARGET_MIPS64
+    tcg_ctx->long_bits = 64;
+#else
+    tcg_ctx->long_bits = 32;
+#endif
+
     if (!clock_get(cpu->clock)) {
 #ifndef CONFIG_USER_ONLY
         if (!qtest_enabled()) {
