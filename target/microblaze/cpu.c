@@ -209,6 +209,12 @@ static void mb_cpu_realizefn(DeviceState *dev, Error **errp)
     int i = 0;
     Error *local_err = NULL;
 
+#ifdef CONFIG_USER_ONLY
+    tcg_ctx->long_bits = 32;
+#else
+    tcg_ctx->long_bits = 64;
+#endif
+
     cpu_exec_realizefn(cs, &local_err);
     if (local_err != NULL) {
         error_propagate(errp, local_err);
