@@ -159,6 +159,8 @@ static void xtensa_cpu_realizefn(DeviceState *dev, Error **errp)
     XtensaCPUClass *xcc = XTENSA_CPU_GET_CLASS(dev);
     Error *local_err = NULL;
 
+    tcg_ctx->long_bits = 32;
+
 #ifndef CONFIG_USER_ONLY
     xtensa_irq_init(&XTENSA_CPU(dev)->env);
 #endif
