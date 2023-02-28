@@ -550,6 +550,9 @@ struct TCGContext {
     int nb_indirects;
     int nb_ops;
 
+    /* target-specific constant for bits per long */
+    uint8_t long_bits;
+
     TCGRegSet reserved_regs;
     intptr_t current_frame_offset;
     intptr_t frame_start;
