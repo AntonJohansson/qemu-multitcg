@@ -201,6 +201,8 @@ static void nios2_cpu_realizefn(DeviceState *dev, Error **errp)
     Nios2CPUClass *ncc = NIOS2_CPU_GET_CLASS(dev);
     Error *local_err = NULL;
 
+    tcg_ctx->long_bits = 32;
+
 #ifndef CONFIG_USER_ONLY
     if (cpu->eic_present) {
         qdev_init_gpio_in_named(DEVICE(cpu), eic_set_irq, "EIC", 1);
