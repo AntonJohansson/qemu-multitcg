@@ -318,7 +318,7 @@ static TCGOp *copy_const_ptr(TCGOp **begin_op, TCGOp *op, void *ptr)
 
 static TCGOp *copy_extu_tl_i64(TCGOp **begin_op, TCGOp *op)
 {
-    if (TARGET_LONG_BITS == 32) {
+    if (tcg_ctx->long_bits == 32) {
         /* extu_i32_i64 */
         op = copy_extu_i32_i64(begin_op, op);
     } else {

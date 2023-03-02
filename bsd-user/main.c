@@ -63,33 +63,17 @@ bool have_guest_base;
  * uses the high bit(s) for pointer tagging and the like.  For them, we
  * must preserve the expected address space.
  */
-#ifndef MAX_RESERVED_VA
-# if HOST_LONG_BITS > TARGET_VIRT_ADDR_SPACE_BITS
-#  if TARGET_VIRT_ADDR_SPACE_BITS == 32 && \
-      (TARGET_LONG_BITS == 32 || defined(TARGET_ABI32))
 /*
  * There are a number of places where we assign reserved_va to a variable
  * of type abi_ulong and expect it to fit.  Avoid the last page.
  */
-#   define MAX_RESERVED_VA  (0xfffffffful & TARGET_PAGE_MASK)
-#  else
-#   define MAX_RESERVED_VA  (1ul << TARGET_VIRT_ADDR_SPACE_BITS)
-#  endif
-# else
-#  define MAX_RESERVED_VA  0
-# endif
-#endif
 
 /*
  * That said, reserving *too* much vm space via mmap can run into problems
  * with rlimits, oom due to page table creation, etc.  We will still try it,
  * if directed by the command-line option, but not by default.
  */
-#if HOST_LONG_BITS == 64 && TARGET_VIRT_ADDR_SPACE_BITS <= 32
-unsigned long reserved_va = MAX_RESERVED_VA;
-#else
 unsigned long reserved_va;
-#endif
 
 static const char *interp_prefix = CONFIG_QEMU_INTERP_PREFIX;
 const char *qemu_uname_release;
@@ -463,6 +447,30 @@ int main(int argc, char **argv)
 
     target_environ = envlist_to_environ(envlist, NULL);
     envlist_free(envlist);
+
+    unsigned max_reserved_va = 0;
+#ifdef MAX_RESERVED_VA
+# if HOST_LONG_BITS > TARGET_VIRT_ADDR_SPACE_BITS
+
+#  if defined(TARGET_ABI32)
+    const bool abi32 = true;
+#  else
+    const bool abi32 = false;
+#  endif
+
+    if (TARGET_VIRT_ADDR_SPACE_BITS == 32 &&
+        (tcg_ctx->long_bits == 32 || abi32)) {
+        max_reserved_va = (0xfffffffful & TARGET_PAGE_MASK);
+    } else {
+        max_reserved_va = (1ul << TARGET_VIRT_ADDR_SPACE_BITS);
+    }
+
+# endif
+#endif
+
+#if HOST_LONG_BITS == 64 && TARGET_VIRT_ADDR_SPACE_BITS <= 32
+    reserved_va = max_reserved_va;
+#endif
 
     if (reserved_va) {
             mmap_next_start = reserved_va;
