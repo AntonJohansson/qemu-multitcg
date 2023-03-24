@@ -108,7 +108,7 @@ void tlb_destroy(CPUState *cpu);
  * Flush one page from the TLB of the specified CPU, for all
  * MMU indexes.
  */
-void tlb_flush_page(CPUState *cpu, target_ulong addr);
+void tlb_flush_page(CPUState *cpu, vaddr addr);
 /**
  * tlb_flush_page_all_cpus:
  * @cpu: src CPU of the flush
@@ -117,7 +117,7 @@ void tlb_flush_page(CPUState *cpu, target_ulong addr);
  * Flush one page from the TLB of the specified CPU, for all
  * MMU indexes.
  */
-void tlb_flush_page_all_cpus(CPUState *src, target_ulong addr);
+void tlb_flush_page_all_cpus(CPUState *src, vaddr addr);
 /**
  * tlb_flush_page_all_cpus_synced:
  * @cpu: src CPU of the flush
@@ -129,7 +129,7 @@ void tlb_flush_page_all_cpus(CPUState *src, target_ulong addr);
  * the source vCPUs safe work is complete. This will depend on when
  * the guests translation ends the TB.
  */
-void tlb_flush_page_all_cpus_synced(CPUState *src, target_ulong addr);
+void tlb_flush_page_all_cpus_synced(CPUState *src, vaddr addr);
 /**
  * tlb_flush:
  * @cpu: CPU whose TLB should be flushed
@@ -164,7 +164,7 @@ void tlb_flush_all_cpus_synced(CPUState *src_cpu);
  * Flush one page from the TLB of the specified CPU, for the specified
  * MMU indexes.
  */
-void tlb_flush_page_by_mmuidx(CPUState *cpu, target_ulong addr,
+void tlb_flush_page_by_mmuidx(CPUState *cpu, vaddr addr,
                               uint16_t idxmap);
 /**
  * tlb_flush_page_by_mmuidx_all_cpus:
@@ -175,7 +175,7 @@ void tlb_flush_page_by_mmuidx(CPUState *cpu, target_ulong addr,
  * Flush one page from the TLB of all CPUs, for the specified
  * MMU indexes.
  */
-void tlb_flush_page_by_mmuidx_all_cpus(CPUState *cpu, target_ulong addr,
+void tlb_flush_page_by_mmuidx_all_cpus(CPUState *cpu, vaddr addr,
                                        uint16_t idxmap);
 /**
  * tlb_flush_page_by_mmuidx_all_cpus_synced:
@@ -189,7 +189,7 @@ void tlb_flush_page_by_mmuidx_all_cpus(CPUState *cpu, target_ulong addr,
  * complete once  the source vCPUs safe work is complete. This will
  * depend on when the guests translation ends the TB.
  */
-void tlb_flush_page_by_mmuidx_all_cpus_synced(CPUState *cpu, target_ulong addr,
+void tlb_flush_page_by_mmuidx_all_cpus_synced(CPUState *cpu, vaddr addr,
                                               uint16_t idxmap);
 /**
  * tlb_flush_by_mmuidx:
@@ -428,16 +428,16 @@ static inline void tlb_flush_range_by_mmuidx_all_cpus_synced(CPUState *cpu,
  * Finally, return the host address for a page that is backed by RAM,
  * or NULL if the page requires I/O.
  */
-void *probe_access(CPUArchState *env, target_ulong addr, int size,
+void *probe_access(CPUArchState *env, vaddr addr, int size,
                    MMUAccessType access_type, int mmu_idx, uintptr_t retaddr);
 
-static inline void *probe_write(CPUArchState *env, target_ulong addr, int size,
+static inline void *probe_write(CPUArchState *env, vaddr addr, int size,
                                 int mmu_idx, uintptr_t retaddr)
 {
     return probe_access(env, addr, size, MMU_DATA_STORE, mmu_idx, retaddr);
 }
 
-static inline void *probe_read(CPUArchState *env, target_ulong addr, int size,
+static inline void *probe_read(CPUArchState *env, vaddr addr, int size,
                                int mmu_idx, uintptr_t retaddr)
 {
     return probe_access(env, addr, size, MMU_DATA_LOAD, mmu_idx, retaddr);
@@ -462,7 +462,7 @@ static inline void *probe_read(CPUArchState *env, target_ulong addr, int size,
  * Do handle clean pages, so exclude TLB_NOTDIRY from the returned flags.
  * For simplicity, all "mmio-like" flags are folded to TLB_MMIO.
  */
-int probe_access_flags(CPUArchState *env, target_ulong addr, int size,
+int probe_access_flags(CPUArchState *env, vaddr addr, int size,
                        MMUAccessType access_type, int mmu_idx,
                        bool nonfault, void **phost, uintptr_t retaddr);
 
@@ -728,7 +728,7 @@ struct MemoryRegionSection *iotlb_to_section(CPUState *cpu,
  *
  * Note: this function can trigger an exception.
  */
-tb_page_addr_t get_page_addr_code_hostp(CPUArchState *env, target_ulong addr,
+tb_page_addr_t get_page_addr_code_hostp(CPUArchState *env, vaddr addr,
                                         void **hostp);
 
 /**
