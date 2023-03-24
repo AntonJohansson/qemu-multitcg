@@ -72,8 +72,8 @@ void helper_be_stq_mmu(CPUArchState *env, target_ulong addr, uint64_t val,
 
 #else
 
-G_NORETURN void helper_unaligned_ld(CPUArchState *env, target_ulong addr);
-G_NORETURN void helper_unaligned_st(CPUArchState *env, target_ulong addr);
+G_NORETURN void helper_unaligned_ld(CPUArchState *env, vaddr addr);
+G_NORETURN void helper_unaligned_st(CPUArchState *env, vaddr addr);
 
 #endif /* CONFIG_SOFTMMU */
 #endif /* TCG_LDST_H */
