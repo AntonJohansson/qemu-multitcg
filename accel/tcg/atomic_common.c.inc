@@ -13,20 +13,20 @@
  * See the COPYING file in the top-level directory.
  */
 
-static void atomic_trace_rmw_post(CPUArchState *env, target_ulong addr,
+static void atomic_trace_rmw_post(CPUArchState *env, vaddr addr,
                                   MemOpIdx oi)
 {
     qemu_plugin_vcpu_mem_cb(env_cpu(env), addr, oi, QEMU_PLUGIN_MEM_RW);
 }
 
 #if HAVE_ATOMIC128
-static void atomic_trace_ld_post(CPUArchState *env, target_ulong addr,
+static void atomic_trace_ld_post(CPUArchState *env, vaddr addr,
                                  MemOpIdx oi)
 {
     qemu_plugin_vcpu_mem_cb(env_cpu(env), addr, oi, QEMU_PLUGIN_MEM_R);
 }
 
-static void atomic_trace_st_post(CPUArchState *env, target_ulong addr,
+static void atomic_trace_st_post(CPUArchState *env, vaddr addr,
                                  MemOpIdx oi)
 {
     qemu_plugin_vcpu_mem_cb(env_cpu(env), addr, oi, QEMU_PLUGIN_MEM_W);
