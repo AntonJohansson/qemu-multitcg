@@ -2000,7 +2000,7 @@ static void tcg_dump_ops(TCGContext *s, FILE *f, bool have_prefs)
             col += ne_fprintf(f, "\n ----");
 
             for (i = 0; i < TARGET_INSN_START_WORDS; ++i) {
-                target_ulong a;
+                tcg_target_ulong a;
 #if TARGET_LONG_BITS > TCG_TARGET_REG_BITS
                 a = deposit64(op->args[i * 2], 32, 32, op->args[i * 2 + 1]);
 #else
@@ -4922,7 +4922,7 @@ int64_t tcg_cpu_exec_time(void)
 #endif
 
 
-int tcg_gen_code(TCGContext *s, TranslationBlock *tb, target_ulong pc_start)
+int tcg_gen_code(TCGContext *s, TranslationBlock *tb, vaddr pc_start)
 {
 #ifdef CONFIG_PROFILER
     TCGProfile *prof = &s->prof;
@@ -5083,7 +5083,7 @@ int tcg_gen_code(TCGContext *s, TranslationBlock *tb, target_ulong pc_start)
             }
             num_insns++;
             for (i = 0; i < TARGET_INSN_START_WORDS; ++i) {
-                target_ulong a;
+                tcg_target_ulong a;
 #if TARGET_LONG_BITS > TCG_TARGET_REG_BITS
                 a = deposit64(op->args[i * 2], 32, 32, op->args[i * 2 + 1]);
 #else

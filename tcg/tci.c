@@ -286,7 +286,7 @@ static bool tci_compare64(uint64_t u0, uint64_t u1, TCGCond condition)
     return result;
 }
 
-static uint64_t tci_qemu_ld(CPUArchState *env, target_ulong taddr,
+static uint64_t tci_qemu_ld(CPUArchState *env, vaddr taddr,
                             MemOpIdx oi, const void *tb_ptr)
 {
     MemOp mop = get_memop(oi);
@@ -375,7 +375,7 @@ static uint64_t tci_qemu_ld(CPUArchState *env, target_ulong taddr,
 #endif
 }
 
-static void tci_qemu_st(CPUArchState *env, target_ulong taddr, uint64_t val,
+static void tci_qemu_st(CPUArchState *env, vaddr taddr, uint64_t val,
                         MemOpIdx oi, const void *tb_ptr)
 {
     MemOp mop = get_memop(oi);
@@ -480,7 +480,7 @@ uintptr_t QEMU_DISABLE_CFI tcg_qemu_tb_exec(CPUArchState *env,
         TCGReg r0, r1, r2, r3, r4, r5;
         tcg_target_ulong t1;
         TCGCond condition;
-        target_ulong taddr;
+        vaddr taddr;
         uint8_t pos, len;
         uint32_t tmp32;
         uint64_t tmp64;
