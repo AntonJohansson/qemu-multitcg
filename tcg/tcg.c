@@ -2000,7 +2000,7 @@ static void tcg_dump_ops(TCGContext *s, FILE *f, bool have_prefs)
             col += ne_fprintf(f, "\n ----");
 
             for (i = 0; i < TARGET_INSN_START_WORDS; ++i) {
-                tcg_target_ulong a;
+                vaddr a;
 #if TARGET_LONG_BITS > TCG_TARGET_REG_BITS
                 a = deposit64(op->args[i * 2], 32, 32, op->args[i * 2 + 1]);
 #else
@@ -5083,7 +5083,7 @@ int tcg_gen_code(TCGContext *s, TranslationBlock *tb, vaddr pc_start)
             }
             num_insns++;
             for (i = 0; i < TARGET_INSN_START_WORDS; ++i) {
-                tcg_target_ulong a;
+                vaddr a;
 #if TARGET_LONG_BITS > TCG_TARGET_REG_BITS
                 a = deposit64(op->args[i * 2], 32, 32, op->args[i * 2 + 1]);
 #else
