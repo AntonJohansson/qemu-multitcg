@@ -1728,7 +1728,7 @@ static void tcg_out_nopn(TCGContext *s, int n)
 }
 
 #if defined(CONFIG_SOFTMMU)
-/* helper signature: helper_ret_ld_mmu(CPUState *env, target_ulong addr,
+/* helper signature: helper_ret_ld_mmu(CPUState *env, vaddr addr,
  *                                     int mmu_idx, uintptr_t ra)
  */
 static void * const qemu_ld_helpers[(MO_SIZE | MO_BSWAP) + 1] = {
@@ -1741,7 +1741,7 @@ static void * const qemu_ld_helpers[(MO_SIZE | MO_BSWAP) + 1] = {
     [MO_BEUQ] = helper_be_ldq_mmu,
 };
 
-/* helper signature: helper_ret_st_mmu(CPUState *env, target_ulong addr,
+/* helper signature: helper_ret_st_mmu(CPUState *env, vaddr addr,
  *                                     uintxx_t val, int mmu_idx, uintptr_t ra)
  */
 static void * const qemu_st_helpers[(MO_SIZE | MO_BSWAP) + 1] = {

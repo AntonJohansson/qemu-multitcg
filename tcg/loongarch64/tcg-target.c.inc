@@ -774,7 +774,7 @@ static bool tcg_out_sti(TCGContext *s, TCGType type, TCGArg val,
 
 #if defined(CONFIG_SOFTMMU)
 /*
- * helper signature: helper_ret_ld_mmu(CPUState *env, target_ulong addr,
+ * helper signature: helper_ret_ld_mmu(CPUState *env, vaddr addr,
  *                                     MemOpIdx oi, uintptr_t ra)
  */
 static void * const qemu_ld_helpers[4] = {
@@ -785,7 +785,7 @@ static void * const qemu_ld_helpers[4] = {
 };
 
 /*
- * helper signature: helper_ret_st_mmu(CPUState *env, target_ulong addr,
+ * helper signature: helper_ret_st_mmu(CPUState *env, vaddr addr,
  *                                     uintxx_t val, MemOpIdx oi,
  *                                     uintptr_t ra)
  */

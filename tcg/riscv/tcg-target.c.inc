@@ -878,7 +878,7 @@ static void tcg_out_mb(TCGContext *s, TCGArg a0)
  */
 
 #if defined(CONFIG_SOFTMMU)
-/* helper signature: helper_ret_ld_mmu(CPUState *env, target_ulong addr,
+/* helper signature: helper_ret_ld_mmu(CPUState *env, vaddr addr,
  *                                     MemOpIdx oi, uintptr_t ra)
  */
 static void * const qemu_ld_helpers[MO_SSIZE + 1] = {
@@ -903,7 +903,7 @@ static void * const qemu_ld_helpers[MO_SSIZE + 1] = {
 #endif
 };
 
-/* helper signature: helper_ret_st_mmu(CPUState *env, target_ulong addr,
+/* helper signature: helper_ret_st_mmu(CPUState *env, vaddr addr,
  *                                     uintxx_t val, MemOpIdx oi,
  *                                     uintptr_t ra)
  */

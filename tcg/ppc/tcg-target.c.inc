@@ -1952,7 +1952,7 @@ static const uint32_t qemu_exts_opc[4] = {
 };
 
 #if defined (CONFIG_SOFTMMU)
-/* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+/* helper signature: helper_ld_mmu(CPUState *env, vaddr addr,
  *                                 int mmu_idx, uintptr_t ra)
  */
 static void * const qemu_ld_helpers[(MO_SIZE | MO_BSWAP) + 1] = {
@@ -1965,7 +1965,7 @@ static void * const qemu_ld_helpers[(MO_SIZE | MO_BSWAP) + 1] = {
     [MO_BEUQ] = helper_be_ldq_mmu,
 };
 
-/* helper signature: helper_st_mmu(CPUState *env, target_ulong addr,
+/* helper signature: helper_st_mmu(CPUState *env, vaddr addr,
  *                                 uintxx_t val, int mmu_idx, uintptr_t ra)
  */
 static void * const qemu_st_helpers[(MO_SIZE | MO_BSWAP) + 1] = {
@@ -2544,7 +2544,7 @@ static void tcg_out_goto_tb(TCGContext *s, int which)
     if (USE_REG_TB) {
         ptrdiff_t offset = tcg_tbrel_diff(s, (void *)ptr);
         tcg_out_mem_long(s, LD, LDX, TCG_REG_TB, TCG_REG_TB, offset);
-    
+
         /* Direct branch will be patched by tb_target_set_jmp_target. */
         set_jmp_insn_offset(s, which);
         tcg_out32(s, MTSPR | RS(TCG_REG_TB) | CTR);
