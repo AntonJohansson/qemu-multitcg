@@ -569,7 +569,7 @@ void tb_check_watchpoint(CPUState *cpu, uintptr_t retaddr)
         tb_page_addr_t addr;
         uint32_t flags;
 
-        cpu_get_tb_cpu_state(env, &pc, &cs_base, &flags);
+        cpu_get_tb_cpu_state(env, (target_ulong *) &pc, (target_ulong *) &cs_base, &flags);
         addr = get_page_addr_code(env, pc);
         if (addr != -1) {
             tb_invalidate_phys_range(addr, addr);
@@ -621,8 +621,8 @@ void cpu_io_recompile(CPUState *cpu, uintptr_t retaddr)
     if (qemu_loglevel_mask(CPU_LOG_EXEC)) {
         vaddr pc = log_pc(cpu, tb);
         if (qemu_log_in_addr_range(pc)) {
-            qemu_log("cpu_io_recompile: rewound execution of TB to "
-                     TARGET_FMT_lx "\n", pc);
+            qemu_log("cpu_io_recompile: rewound execution of TB to %"
+                     VADDR_PRIx "\n", pc);
         }
     }
 

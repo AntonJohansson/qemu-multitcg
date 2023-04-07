@@ -302,8 +302,8 @@ static void log_cpu_exec(vaddr pc, CPUState *cpu,
 {
     if (qemu_log_in_addr_range(pc)) {
         qemu_log_mask(CPU_LOG_EXEC,
-                      "Trace %d: %p [" TARGET_FMT_lx
-                      "/" TARGET_FMT_lx "/%08x/%08x] %s\n",
+                      "Trace %d: %p [%" VADDR_PRIx
+                      "/%" VADDR_PRIx "/%08x/%08x] %s\n",
                       cpu->cpu_index, tb->tc.ptr, tb->cs_base, pc,
                       tb->flags, tb->cflags, lookup_symbol(pc));
 
@@ -415,7 +415,7 @@ const void *HELPER(lookup_tb_ptr)(CPUArchState *env)
     vaddr cs_base, pc;
     uint32_t flags, cflags;
 
-    cpu_get_tb_cpu_state(env, &pc, &cs_base, &flags);
+    cpu_get_tb_cpu_state(env, (target_ulong *) &pc, (target_ulong *) &cs_base, &flags);
 
     cflags = curr_cflags(cpu);
     if (check_for_breakpoints(cpu, pc, &cflags)) {
@@ -490,8 +490,8 @@ cpu_tb_exec(CPUState *cpu, TranslationBlock *itb, int *tb_exit)
         if (qemu_loglevel_mask(CPU_LOG_EXEC)) {
             vaddr pc = log_pc(cpu, last_tb);
             if (qemu_log_in_addr_range(pc)) {
-                qemu_log("Stopped execution of TB chain before %p ["
-                         TARGET_FMT_lx "] %s\n",
+                qemu_log("Stopped execution of TB chain before %p [%"
+                         VADDR_PRIx "] %s\n",
                          last_tb->tc.ptr, pc, lookup_symbol(pc));
             }
         }
@@ -543,7 +543,7 @@ void cpu_exec_step_atomic(CPUState *cpu)
         g_assert(!cpu->running);
         cpu->running = true;
 
-        cpu_get_tb_cpu_state(env, &pc, &cs_base, &flags);
+        cpu_get_tb_cpu_state(env, (target_ulong *) &pc, (target_ulong *) &cs_base, &flags);
 
         cflags = curr_cflags(cpu);
         /* Execute in a serial context. */
@@ -949,7 +949,7 @@ cpu_exec_loop(CPUState *cpu, SyncClocks *sc)
             vaddr cs_base, pc;
             uint32_t flags, cflags;
 
-            cpu_get_tb_cpu_state(cpu->env_ptr, &pc, &cs_base, &flags);
+            cpu_get_tb_cpu_state(cpu->env_ptr, (target_ulong *) &pc, (target_ulong *) &cs_base, &flags);
 
             /*
              * When requested, use an exact setting for cflags for the next
