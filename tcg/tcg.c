@@ -2006,7 +2006,7 @@ static void tcg_dump_ops(TCGContext *s, FILE *f, bool have_prefs)
 #else
                 a = op->args[i];
 #endif
-                col += ne_fprintf(f, " " TARGET_FMT_lx, a);
+                col += ne_fprintf(f, " %" VADDR_PRIx, a);
             }
         } else if (c == INDEX_op_call) {
             const TCGHelperInfo *info = tcg_call_info(op);
