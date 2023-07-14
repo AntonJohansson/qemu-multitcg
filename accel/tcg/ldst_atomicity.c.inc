@@ -26,7 +26,7 @@
  * If the operation must be split into two operations to be
  * examined separately for atomicity, return -lg2.
  */
-static int required_atomicity(CPUArchState *env, uintptr_t p, MemOp memop)
+static int required_atomicity(CPUState *cpu, uintptr_t p, MemOp memop)
 {
     MemOp atom = memop & MO_ATOM_MASK;
     MemOp size = memop & MO_SIZE;
@@ -93,7 +93,7 @@ static int required_atomicity(CPUArchState *env, uintptr_t p, MemOp memop)
      * host atomicity in order to avoid racing.  This reduction
      * avoids looping with cpu_loop_exit_atomic.
      */
-    if (cpu_in_serial_context(env_cpu(env))) {
+    if (cpu_in_serial_context(cpu)) {
         return MO_8;
     }
     return atmax;
@@ -139,14 +139,14 @@ static inline uint64_t load_atomic8(void *pv)
 
 /**
  * load_atomic8_or_exit:
- * @env: cpu context
+ * @cpu: generic cpu state
  * @ra: host unwind address
  * @pv: host address
  *
  * Atomically load 8 aligned bytes from @pv.
  * If this is not possible, longjmp out to restart serially.
  */
-static uint64_t load_atomic8_or_exit(CPUArchState *env, uintptr_t ra, void *pv)
+static uint64_t load_atomic8_or_exit(CPUState *cpu, uintptr_t ra, void *pv)
 {
     if (HAVE_al8) {
         return load_atomic8(pv);
@@ -166,19 +166,19 @@ static uint64_t load_atomic8_or_exit(CPUArchState *env, uintptr_t ra, void *pv)
 #endif
 
     /* Ultimate fallback: re-execute in serial context. */
-    cpu_loop_exit_atomic(env_cpu(env), ra);
+    cpu_loop_exit_atomic(cpu, ra);
 }
 
 /**
  * load_atomic16_or_exit:
- * @env: cpu context
+ * @cpu: generic cpu state
  * @ra: host unwind address
  * @pv: host address
  *
  * Atomically load 16 aligned bytes from @pv.
  * If this is not possible, longjmp out to restart serially.
  */
-static Int128 load_atomic16_or_exit(CPUArchState *env, uintptr_t ra, void *pv)
+static Int128 load_atomic16_or_exit(CPUState *cpu, uintptr_t ra, void *pv)
 {
     Int128 *p = __builtin_assume_aligned(pv, 16);
 
@@ -208,7 +208,7 @@ static Int128 load_atomic16_or_exit(CPUArchState *env, uintptr_t ra, void *pv)
     }
 
     /* Ultimate fallback: re-execute in serial context. */
-    cpu_loop_exit_atomic(env_cpu(env), ra);
+    cpu_loop_exit_atomic(cpu, ra);
 }
 
 /**
@@ -259,7 +259,7 @@ static uint64_t load_atom_extract_al8x2(void *pv)
 
 /**
  * load_atom_extract_al8_or_exit:
- * @env: cpu context
+ * @cpu: generic cpu state
  * @ra: host unwind address
  * @pv: host address
  * @s: object size in bytes, @s <= 4.
@@ -269,7 +269,7 @@ static uint64_t load_atom_extract_al8x2(void *pv)
  * 8-byte load and extract.
  * The value is returned in the low bits of a uint32_t.
  */
-static uint32_t load_atom_extract_al8_or_exit(CPUArchState *env, uintptr_t ra,
+static uint32_t load_atom_extract_al8_or_exit(CPUState *cpu, uintptr_t ra,
                                               void *pv, int s)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -277,12 +277,12 @@ static uint32_t load_atom_extract_al8_or_exit(CPUArchState *env, uintptr_t ra,
     int shr = (HOST_BIG_ENDIAN ? 8 - s - o : o) * 8;
 
     pv = (void *)(pi & ~7);
-    return load_atomic8_or_exit(env, ra, pv) >> shr;
+    return load_atomic8_or_exit(cpu, ra, pv) >> shr;
 }
 
 /**
  * load_atom_extract_al16_or_exit:
- * @env: cpu context
+ * @cpu: generic cpu state
  * @ra: host unwind address
  * @p: host address
  * @s: object size in bytes, @s <= 8.
@@ -295,7 +295,7 @@ static uint32_t load_atom_extract_al8_or_exit(CPUArchState *env, uintptr_t ra,
  *
  * If this is not possible, longjmp out to restart serially.
  */
-static uint64_t load_atom_extract_al16_or_exit(CPUArchState *env, uintptr_t ra,
+static uint64_t load_atom_extract_al16_or_exit(CPUState *cpu, uintptr_t ra,
                                                void *pv, int s)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -308,7 +308,7 @@ static uint64_t load_atom_extract_al16_or_exit(CPUArchState *env, uintptr_t ra,
      * Provoke SIGBUS if possible otherwise.
      */
     pv = (void *)(pi & ~7);
-    r = load_atomic16_or_exit(env, ra, pv);
+    r = load_atomic16_or_exit(cpu, ra, pv);
 
     r = int128_urshift(r, shr);
     return int128_getlo(r);
@@ -390,7 +390,7 @@ static inline uint64_t load_atom_8_by_8_or_4(void *pv)
  *
  * Load 2 bytes from @p, honoring the atomicity of @memop.
  */
-static uint16_t load_atom_2(CPUArchState *env, uintptr_t ra,
+static uint16_t load_atom_2(CPUState *cpu, uintptr_t ra,
                             void *pv, MemOp memop)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -403,7 +403,7 @@ static uint16_t load_atom_2(CPUArchState *env, uintptr_t ra,
         return load_atom_extract_al16_or_al8(pv, 2);
     }
 
-    atmax = required_atomicity(env, pi, memop);
+    atmax = required_atomicity(cpu, pi, memop);
     switch (atmax) {
     case MO_8:
         return lduw_he_p(pv);
@@ -414,9 +414,9 @@ static uint16_t load_atom_2(CPUArchState *env, uintptr_t ra,
             return load_atomic4(pv - 1) >> 8;
         }
         if ((pi & 15) != 7) {
-            return load_atom_extract_al8_or_exit(env, ra, pv, 2);
+            return load_atom_extract_al8_or_exit(cpu, ra, pv, 2);
         }
-        return load_atom_extract_al16_or_exit(env, ra, pv, 2);
+        return load_atom_extract_al16_or_exit(cpu, ra, pv, 2);
     default:
         g_assert_not_reached();
     }
@@ -429,7 +429,7 @@ static uint16_t load_atom_2(CPUArchState *env, uintptr_t ra,
  *
  * Load 4 bytes from @p, honoring the atomicity of @memop.
  */
-static uint32_t load_atom_4(CPUArchState *env, uintptr_t ra,
+static uint32_t load_atom_4(CPUState *cpu, uintptr_t ra,
                             void *pv, MemOp memop)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -442,7 +442,7 @@ static uint32_t load_atom_4(CPUArchState *env, uintptr_t ra,
         return load_atom_extract_al16_or_al8(pv, 4);
     }
 
-    atmax = required_atomicity(env, pi, memop);
+    atmax = required_atomicity(cpu, pi, memop);
     switch (atmax) {
     case MO_8:
     case MO_16:
@@ -456,9 +456,9 @@ static uint32_t load_atom_4(CPUArchState *env, uintptr_t ra,
         return load_atom_extract_al4x2(pv);
     case MO_32:
         if (!(pi & 4)) {
-            return load_atom_extract_al8_or_exit(env, ra, pv, 4);
+            return load_atom_extract_al8_or_exit(cpu, ra, pv, 4);
         }
-        return load_atom_extract_al16_or_exit(env, ra, pv, 4);
+        return load_atom_extract_al16_or_exit(cpu, ra, pv, 4);
     default:
         g_assert_not_reached();
     }
@@ -471,7 +471,7 @@ static uint32_t load_atom_4(CPUArchState *env, uintptr_t ra,
  *
  * Load 8 bytes from @p, honoring the atomicity of @memop.
  */
-static uint64_t load_atom_8(CPUArchState *env, uintptr_t ra,
+static uint64_t load_atom_8(CPUState *cpu, uintptr_t ra,
                             void *pv, MemOp memop)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -488,12 +488,12 @@ static uint64_t load_atom_8(CPUArchState *env, uintptr_t ra,
         return load_atom_extract_al16_or_al8(pv, 8);
     }
 
-    atmax = required_atomicity(env, pi, memop);
+    atmax = required_atomicity(cpu, pi, memop);
     if (atmax == MO_64) {
         if (!HAVE_al8 && (pi & 7) == 0) {
-            load_atomic8_or_exit(env, ra, pv);
+            load_atomic8_or_exit(cpu, ra, pv);
         }
-        return load_atom_extract_al16_or_exit(env, ra, pv, 8);
+        return load_atom_extract_al16_or_exit(cpu, ra, pv, 8);
     }
     if (HAVE_al8_fast) {
         return load_atom_extract_al8x2(pv);
@@ -509,7 +509,7 @@ static uint64_t load_atom_8(CPUArchState *env, uintptr_t ra,
         if (HAVE_al8) {
             return load_atom_extract_al8x2(pv);
         }
-        cpu_loop_exit_atomic(env_cpu(env), ra);
+        cpu_loop_exit_atomic(cpu, ra);
     default:
         g_assert_not_reached();
     }
@@ -522,7 +522,7 @@ static uint64_t load_atom_8(CPUArchState *env, uintptr_t ra,
  *
  * Load 16 bytes from @p, honoring the atomicity of @memop.
  */
-static Int128 load_atom_16(CPUArchState *env, uintptr_t ra,
+static Int128 load_atom_16(CPUState *cpu, uintptr_t ra,
                            void *pv, MemOp memop)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -538,7 +538,7 @@ static Int128 load_atom_16(CPUArchState *env, uintptr_t ra,
         return atomic16_read_ro(pv);
     }
 
-    atmax = required_atomicity(env, pi, memop);
+    atmax = required_atomicity(cpu, pi, memop);
     switch (atmax) {
     case MO_8:
         memcpy(&r, pv, 16);
@@ -553,20 +553,20 @@ static Int128 load_atom_16(CPUArchState *env, uintptr_t ra,
         break;
     case MO_64:
         if (!HAVE_al8) {
-            cpu_loop_exit_atomic(env_cpu(env), ra);
+            cpu_loop_exit_atomic(cpu, ra);
         }
         a = load_atomic8(pv);
         b = load_atomic8(pv + 8);
         break;
     case -MO_64:
         if (!HAVE_al8) {
-            cpu_loop_exit_atomic(env_cpu(env), ra);
+            cpu_loop_exit_atomic(cpu, ra);
         }
         a = load_atom_extract_al8x2(pv);
         b = load_atom_extract_al8x2(pv + 8);
         break;
     case MO_128:
-        return load_atomic16_or_exit(env, ra, pv);
+        return load_atomic16_or_exit(cpu, ra, pv);
     default:
         g_assert_not_reached();
     }
@@ -847,7 +847,7 @@ static uint64_t store_whole_le16(void *pv, int size, Int128 val_le)
  *
  * Store 2 bytes to @p, honoring the atomicity of @memop.
  */
-static void store_atom_2(CPUArchState *env, uintptr_t ra,
+static void store_atom_2(CPUState *cpu, uintptr_t ra,
                          void *pv, MemOp memop, uint16_t val)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -858,7 +858,7 @@ static void store_atom_2(CPUArchState *env, uintptr_t ra,
         return;
     }
 
-    atmax = required_atomicity(env, pi, memop);
+    atmax = required_atomicity(cpu, pi, memop);
     if (atmax == MO_8) {
         stw_he_p(pv, val);
         return;
@@ -887,7 +887,7 @@ static void store_atom_2(CPUArchState *env, uintptr_t ra,
         g_assert_not_reached();
     }
 
-    cpu_loop_exit_atomic(env_cpu(env), ra);
+    cpu_loop_exit_atomic(cpu, ra);
 }
 
 /**
@@ -898,7 +898,7 @@ static void store_atom_2(CPUArchState *env, uintptr_t ra,
  *
  * Store 4 bytes to @p, honoring the atomicity of @memop.
  */
-static void store_atom_4(CPUArchState *env, uintptr_t ra,
+static void store_atom_4(CPUState *cpu, uintptr_t ra,
                          void *pv, MemOp memop, uint32_t val)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -909,7 +909,7 @@ static void store_atom_4(CPUArchState *env, uintptr_t ra,
         return;
     }
 
-    atmax = required_atomicity(env, pi, memop);
+    atmax = required_atomicity(cpu, pi, memop);
     switch (atmax) {
     case MO_8:
         stl_he_p(pv, val);
@@ -951,7 +951,7 @@ static void store_atom_4(CPUArchState *env, uintptr_t ra,
                 return;
             }
         }
-        cpu_loop_exit_atomic(env_cpu(env), ra);
+        cpu_loop_exit_atomic(cpu, ra);
     default:
         g_assert_not_reached();
     }
@@ -965,7 +965,7 @@ static void store_atom_4(CPUArchState *env, uintptr_t ra,
  *
  * Store 8 bytes to @p, honoring the atomicity of @memop.
  */
-static void store_atom_8(CPUArchState *env, uintptr_t ra,
+static void store_atom_8(CPUState *cpu, uintptr_t ra,
                          void *pv, MemOp memop, uint64_t val)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -976,7 +976,7 @@ static void store_atom_8(CPUArchState *env, uintptr_t ra,
         return;
     }
 
-    atmax = required_atomicity(env, pi, memop);
+    atmax = required_atomicity(cpu, pi, memop);
     switch (atmax) {
     case MO_8:
         stq_he_p(pv, val);
@@ -1019,7 +1019,7 @@ static void store_atom_8(CPUArchState *env, uintptr_t ra,
     default:
         g_assert_not_reached();
     }
-    cpu_loop_exit_atomic(env_cpu(env), ra);
+    cpu_loop_exit_atomic(cpu, ra);
 }
 
 /**
@@ -1030,7 +1030,7 @@ static void store_atom_8(CPUArchState *env, uintptr_t ra,
  *
  * Store 16 bytes to @p, honoring the atomicity of @memop.
  */
-static void store_atom_16(CPUArchState *env, uintptr_t ra,
+static void store_atom_16(CPUState *cpu, uintptr_t ra,
                           void *pv, MemOp memop, Int128 val)
 {
     uintptr_t pi = (uintptr_t)pv;
@@ -1042,7 +1042,7 @@ static void store_atom_16(CPUArchState *env, uintptr_t ra,
         return;
     }
 
-    atmax = required_atomicity(env, pi, memop);
+    atmax = required_atomicity(cpu, pi, memop);
 
     a = HOST_BIG_ENDIAN ? int128_gethi(val) : int128_getlo(val);
     b = HOST_BIG_ENDIAN ? int128_getlo(val) : int128_gethi(val);
@@ -1101,5 +1101,5 @@ static void store_atom_16(CPUArchState *env, uintptr_t ra,
     default:
         g_assert_not_reached();
     }
-    cpu_loop_exit_atomic(env_cpu(env), ra);
+    cpu_loop_exit_atomic(cpu, ra);
 }
