@@ -1005,7 +1005,7 @@ static uint16_t do_ld2_mmu(CPUState *cpu, abi_ptr addr,
     tcg_debug_assert((mop & MO_SIZE) == MO_16);
     cpu_req_mo(TCG_MO_LD_LD | TCG_MO_ST_LD);
     haddr = cpu_mmu_lookup(cpu, addr, mop, ra, MMU_DATA_LOAD);
-    ret = load_atom_2(cpu->env_ptr, ra, haddr, mop);
+    ret = load_atom_2(cpu, ra, haddr, mop);
     clear_helper_retaddr();
 
     if (mop & MO_BSWAP) {
@@ -1043,7 +1043,7 @@ static uint32_t do_ld4_mmu(CPUState *cpu, abi_ptr addr,
     tcg_debug_assert((mop & MO_SIZE) == MO_32);
     cpu_req_mo(TCG_MO_LD_LD | TCG_MO_ST_LD);
     haddr = cpu_mmu_lookup(cpu, addr, mop, ra, MMU_DATA_LOAD);
-    ret = load_atom_4(cpu->env_ptr, ra, haddr, mop);
+    ret = load_atom_4(cpu, ra, haddr, mop);
     clear_helper_retaddr();
 
     if (mop & MO_BSWAP) {
@@ -1081,7 +1081,7 @@ static uint64_t do_ld8_mmu(CPUState *cpu, abi_ptr addr,
     tcg_debug_assert((mop & MO_SIZE) == MO_64);
     cpu_req_mo(TCG_MO_LD_LD | TCG_MO_ST_LD);
     haddr = cpu_mmu_lookup(cpu, addr, mop, ra, MMU_DATA_LOAD);
-    ret = load_atom_8(cpu->env_ptr, ra, haddr, mop);
+    ret = load_atom_8(cpu, ra, haddr, mop);
     clear_helper_retaddr();
 
     if (mop & MO_BSWAP) {
@@ -1113,7 +1113,7 @@ static Int128 do_ld16_mmu(CPUState *cpu, abi_ptr addr,
     tcg_debug_assert((mop & MO_SIZE) == MO_128);
     cpu_req_mo(TCG_MO_LD_LD | TCG_MO_ST_LD);
     haddr = cpu_mmu_lookup(cpu, addr, mop, ra, MMU_DATA_LOAD);
-    ret = load_atom_16(cpu->env_ptr, ra, haddr, mop);
+    ret = load_atom_16(cpu, ra, haddr, mop);
     clear_helper_retaddr();
 
     if (mop & MO_BSWAP) {
@@ -1178,7 +1178,7 @@ static void do_st2_mmu(CPUState *cpu, abi_ptr addr, uint16_t val,
     if (mop & MO_BSWAP) {
         val = bswap16(val);
     }
-    store_atom_2(cpu->env_ptr, ra, haddr, mop, val);
+    store_atom_2(cpu, ra, haddr, mop, val);
     clear_helper_retaddr();
 }
 
@@ -1207,7 +1207,7 @@ static void do_st4_mmu(CPUState *cpu, abi_ptr addr, uint32_t val,
     if (mop & MO_BSWAP) {
         val = bswap32(val);
     }
-    store_atom_4(cpu->env_ptr, ra, haddr, mop, val);
+    store_atom_4(cpu, ra, haddr, mop, val);
     clear_helper_retaddr();
 }
 
@@ -1236,7 +1236,7 @@ static void do_st8_mmu(CPUState *cpu, abi_ptr addr, uint64_t val,
     if (mop & MO_BSWAP) {
         val = bswap64(val);
     }
-    store_atom_8(cpu->env_ptr, ra, haddr, mop, val);
+    store_atom_8(cpu, ra, haddr, mop, val);
     clear_helper_retaddr();
 }
 
@@ -1265,7 +1265,7 @@ static void do_st16_mmu(CPUState *cpu, abi_ptr addr, Int128 val,
     if (mop & MO_BSWAP) {
         val = bswap128(val);
     }
-    store_atom_16(cpu->env_ptr, ra, haddr, mop, val);
+    store_atom_16(cpu, ra, haddr, mop, val);
     clear_helper_retaddr();
 }
 
