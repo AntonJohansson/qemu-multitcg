@@ -1498,26 +1498,24 @@ static void notdirty_write(CPUState *cpu, vaddr mem_vaddr, unsigned size,
     }
 }
 
-static int probe_access_internal(CPUArchState *env, vaddr addr,
+static int probe_access_internal(CPUState *cpu, vaddr addr,
                                  int fault_size, MMUAccessType access_type,
                                  int mmu_idx, bool nonfault,
                                  void **phost, CPUTLBEntryFull **pfull,
                                  uintptr_t retaddr, bool check_mem_cbs)
 {
-    uintptr_t index = tlb_index(env_cpu(env), mmu_idx, addr);
-    CPUTLBEntry *entry = tlb_entry(env_cpu(env), mmu_idx, addr);
+    uintptr_t index = tlb_index(cpu, mmu_idx, addr);
+    CPUTLBEntry *entry = tlb_entry(cpu, mmu_idx, addr);
     uint64_t tlb_addr = tlb_read_idx(entry, access_type);
     vaddr page_addr = addr & TARGET_PAGE_MASK;
     int flags = TLB_FLAGS_MASK & ~TLB_FORCE_SLOW;
-    bool force_mmio = check_mem_cbs && cpu_plugin_mem_cbs_enabled(env_cpu(env));
+    bool force_mmio = check_mem_cbs && cpu_plugin_mem_cbs_enabled(cpu);
     CPUTLBEntryFull *full;
 
     if (!tlb_hit_page(tlb_addr, page_addr)) {
-        if (!victim_tlb_hit(env_cpu(env), mmu_idx, index, access_type, page_addr)) {
-            CPUState *cs = env_cpu(env);
-
-            if (!cs->cc->tcg_ops->tlb_fill(cs, addr, fault_size, access_type,
-                                           mmu_idx, nonfault, retaddr)) {
+        if (!victim_tlb_hit(cpu, mmu_idx, index, access_type, page_addr)) {
+            if (!cpu->cc->tcg_ops->tlb_fill(cpu, addr, fault_size, access_type,
+                                            mmu_idx, nonfault, retaddr)) {
                 /* Non-faulting page table read failed.  */
                 *phost = NULL;
                 *pfull = NULL;
@@ -1525,8 +1523,8 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
             }
 
             /* TLB resize via tlb_fill may have moved the entry.  */
-            index = tlb_index(env_cpu(env), mmu_idx, addr);
-            entry = tlb_entry(env_cpu(env), mmu_idx, addr);
+            index = tlb_index(cpu, mmu_idx, addr);
+            entry = tlb_entry(cpu, mmu_idx, addr);
 
             /*
              * With PAGE_WRITE_INV, we set TLB_INVALID_MASK immediately,
@@ -1539,7 +1537,7 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
     }
     flags &= tlb_addr;
 
-    *pfull = full = &env_tlb(env)->d[mmu_idx].fulltlb[index];
+    *pfull = full = &cpu_tlb(cpu)->d[mmu_idx].fulltlb[index];
     flags |= full->slow_flags[access_type];
 
     /* Fold all "mmio-like" bits into TLB_MMIO.  This is not RAM.  */
@@ -1560,7 +1558,7 @@ int probe_access_full(CPUArchState *env, vaddr addr, int size,
                       bool nonfault, void **phost, CPUTLBEntryFull **pfull,
                       uintptr_t retaddr)
 {
-    int flags = probe_access_internal(env, addr, size, access_type, mmu_idx,
+    int flags = probe_access_internal(env_cpu(env), addr, size, access_type, mmu_idx,
                                       nonfault, phost, pfull, retaddr, true);
 
     /* Handle clean RAM pages.  */
@@ -1583,7 +1581,7 @@ int probe_access_full_mmu(CPUArchState *env, vaddr addr, int size,
     phost = phost ? phost : &discard_phost;
     pfull = pfull ? pfull : &discard_tlb;
 
-    int flags = probe_access_internal(env, addr, size, access_type, mmu_idx,
+    int flags = probe_access_internal(env_cpu(env), addr, size, access_type, mmu_idx,
                                       true, phost, pfull, 0, false);
 
     /* Handle clean RAM pages.  */
@@ -1604,7 +1602,7 @@ int probe_access_flags(CPUArchState *env, vaddr addr, int size,
 
     g_assert(-(addr | TARGET_PAGE_MASK) >= size);
 
-    flags = probe_access_internal(env, addr, size, access_type, mmu_idx,
+    flags = probe_access_internal(env_cpu(env), addr, size, access_type, mmu_idx,
                                   nonfault, phost, &full, retaddr, true);
 
     /* Handle clean RAM pages. */
@@ -1625,7 +1623,7 @@ void *probe_access(CPUArchState *env, vaddr addr, int size,
 
     g_assert(-(addr | TARGET_PAGE_MASK) >= size);
 
-    flags = probe_access_internal(env, addr, size, access_type, mmu_idx,
+    flags = probe_access_internal(env_cpu(env), addr, size, access_type, mmu_idx,
                                   false, &host, &full, retaddr, true);
 
     /* Per the interface, size == 0 merely faults the access. */
@@ -1658,7 +1656,7 @@ void *tlb_vaddr_to_host(CPUArchState *env, abi_ptr addr,
     void *host;
     int flags;
 
-    flags = probe_access_internal(env, addr, 0, access_type,
+    flags = probe_access_internal(env_cpu(env), addr, 0, access_type,
                                   mmu_idx, true, &host, &full, 0, false);
 
     /* No combination of flags are expected by the caller. */
