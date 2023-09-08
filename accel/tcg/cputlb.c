@@ -1504,8 +1504,8 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
                                  void **phost, CPUTLBEntryFull **pfull,
                                  uintptr_t retaddr, bool check_mem_cbs)
 {
-    uintptr_t index = tlb_index(env, mmu_idx, addr);
-    CPUTLBEntry *entry = tlb_entry(env, mmu_idx, addr);
+    uintptr_t index = tlb_index(env_cpu(env), mmu_idx, addr);
+    CPUTLBEntry *entry = tlb_entry(env_cpu(env), mmu_idx, addr);
     uint64_t tlb_addr = tlb_read_idx(entry, access_type);
     vaddr page_addr = addr & TARGET_PAGE_MASK;
     int flags = TLB_FLAGS_MASK & ~TLB_FORCE_SLOW;
@@ -1513,7 +1513,7 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
     CPUTLBEntryFull *full;
 
     if (!tlb_hit_page(tlb_addr, page_addr)) {
-        if (!victim_tlb_hit(env, mmu_idx, index, access_type, page_addr)) {
+        if (!victim_tlb_hit(env_cpu(env), mmu_idx, index, access_type, page_addr)) {
             CPUState *cs = env_cpu(env);
 
             if (!cs->cc->tcg_ops->tlb_fill(cs, addr, fault_size, access_type,
@@ -1525,8 +1525,8 @@ static int probe_access_internal(CPUArchState *env, vaddr addr,
             }
 
             /* TLB resize via tlb_fill may have moved the entry.  */
-            index = tlb_index(env, mmu_idx, addr);
-            entry = tlb_entry(env, mmu_idx, addr);
+            index = tlb_index(env_cpu(env), mmu_idx, addr);
+            entry = tlb_entry(env_cpu(env), mmu_idx, addr);
 
             /*
              * With PAGE_WRITE_INV, we set TLB_INVALID_MASK immediately,
@@ -1784,8 +1784,8 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data,
                         int mmu_idx, MMUAccessType access_type, uintptr_t ra)
 {
     vaddr addr = data->addr;
-    uintptr_t index = tlb_index(env, mmu_idx, addr);
-    CPUTLBEntry *entry = tlb_entry(env, mmu_idx, addr);
+    uintptr_t index = tlb_index(env_cpu(env), mmu_idx, addr);
+    CPUTLBEntry *entry = tlb_entry(env_cpu(env), mmu_idx, addr);
     uint64_t tlb_addr = tlb_read_idx(entry, access_type);
     bool maybe_resized = false;
     CPUTLBEntryFull *full;
@@ -1793,12 +1793,12 @@ static bool mmu_lookup1(CPUArchState *env, MMULookupPageData *data,
 
     /* If the TLB entry is for a different page, reload and try again.  */
     if (!tlb_hit(tlb_addr, addr)) {
-        if (!victim_tlb_hit(env, mmu_idx, index, access_type,
+        if (!victim_tlb_hit(env_cpu(env), mmu_idx, index, access_type,
                             addr & TARGET_PAGE_MASK)) {
             tlb_fill(env_cpu(env), addr, data->size, access_type, mmu_idx, ra);
             maybe_resized = true;
-            index = tlb_index(env, mmu_idx, addr);
-            entry = tlb_entry(env, mmu_idx, addr);
+            index = tlb_index(env_cpu(env), mmu_idx, addr);
+            entry = tlb_entry(env_cpu(env), mmu_idx, addr);
         }
         tlb_addr = tlb_read_idx(entry, access_type) & ~TLB_INVALID_MASK;
     }
@@ -1906,7 +1906,7 @@ static bool mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
          */
         mmu_lookup1(env, &l->page[0], l->mmu_idx, type, ra);
         if (mmu_lookup1(env, &l->page[1], l->mmu_idx, type, ra)) {
-            uintptr_t index = tlb_index(env, l->mmu_idx, addr);
+            uintptr_t index = tlb_index(env_cpu(env), l->mmu_idx, addr);
             l->page[0].full = &env_tlb(env)->d[l->mmu_idx].fulltlb[index];
         }
 
@@ -1964,18 +1964,18 @@ static void *atomic_mmu_lookup(CPUArchState *env, vaddr addr, MemOpIdx oi,
         goto stop_the_world;
     }
 
-    index = tlb_index(env, mmu_idx, addr);
-    tlbe = tlb_entry(env, mmu_idx, addr);
+    index = tlb_index(env_cpu(env), mmu_idx, addr);
+    tlbe = tlb_entry(env_cpu(env), mmu_idx, addr);
 
     /* Check TLB entry and enforce page permissions.  */
     tlb_addr = tlb_addr_write(tlbe);
     if (!tlb_hit(tlb_addr, addr)) {
-        if (!victim_tlb_hit(env, mmu_idx, index, MMU_DATA_STORE,
+        if (!victim_tlb_hit(env_cpu(env), mmu_idx, index, MMU_DATA_STORE,
                             addr & TARGET_PAGE_MASK)) {
             tlb_fill(env_cpu(env), addr, size,
                      MMU_DATA_STORE, mmu_idx, retaddr);
-            index = tlb_index(env, mmu_idx, addr);
-            tlbe = tlb_entry(env, mmu_idx, addr);
+            index = tlb_index(env_cpu(env), mmu_idx, addr);
+            tlbe = tlb_entry(env_cpu(env), mmu_idx, addr);
         }
         tlb_addr = tlb_addr_write(tlbe) & ~TLB_INVALID_MASK;
     }
