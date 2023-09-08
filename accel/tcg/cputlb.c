@@ -1677,7 +1677,7 @@ tb_page_addr_t get_page_addr_code_hostp(CPUArchState *env, vaddr addr,
     CPUTLBEntryFull *full;
     void *p;
 
-    (void)probe_access_internal(env, addr, 1, MMU_INST_FETCH,
+    (void)probe_access_internal(env_cpu(env), addr, 1, MMU_INST_FETCH,
                                 cpu_mmu_index(env, true), false,
                                 &p, &full, 0, false);
     if (p == NULL) {
