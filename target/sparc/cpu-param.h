@@ -9,7 +9,6 @@
 
 #ifdef TARGET_SPARC64
 # define TARGET_LONG_BITS 64
-# define TARGET_PAGE_BITS 13 /* 8k */
 # define TARGET_PHYS_ADDR_SPACE_BITS  41
 # ifdef TARGET_ABI32
 #  define TARGET_VIRT_ADDR_SPACE_BITS 32
@@ -18,9 +17,23 @@
 # endif
 #else
 # define TARGET_LONG_BITS 32
-# define TARGET_PAGE_BITS 12 /* 4k */
 # define TARGET_PHYS_ADDR_SPACE_BITS 36
 # define TARGET_VIRT_ADDR_SPACE_BITS 32
+#endif
+
+#ifdef CONFIG_USER_ONLY
+# ifdef TARGET_SPARC64
+#  define TARGET_PAGE_BITS 13 /* 8k */
+# else
+#  define TARGET_PAGE_BITS 12 /* 4k */
+# endif
+#else
+# define TARGET_PAGE_BITS_VARY
+# ifdef TARGET_SPARC64
+#  define TARGET_PAGE_BITS_MIN 13 /* 8k */
+# else
+#  define TARGET_PAGE_BITS_MIN 12 /* 4k */
+# endif
 #endif
 
 #endif

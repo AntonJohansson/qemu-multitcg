@@ -9,7 +9,13 @@
 #define ALPHA_CPU_PARAM_H
 
 #define TARGET_LONG_BITS 64
+
+#ifdef CONFIG_USER_ONLY
 #define TARGET_PAGE_BITS 13
+#else
+#define TARGET_PAGE_BITS_VARY
+#define TARGET_PAGE_BITS_MIN 13
+#endif
 
 /* ??? EV4 has 34 phys addr bits, EV5 has 40, EV6 has 44.  */
 #define TARGET_PHYS_ADDR_SPACE_BITS  44
