@@ -36,7 +36,7 @@
 #define TARGET_PAGE_BITS 12
 #else
 #define TARGET_PAGE_BITS_VARY
-#define TARGET_PAGE_BITS_MIN 12
+#define TARGET_PAGE_BITS_MIN_SPECIFIC 12
 #endif
 
 #endif

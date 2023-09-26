@@ -17,7 +17,7 @@
 #else
 # define TARGET_VIRT_ADDR_SPACE_BITS 32
 # define TARGET_PAGE_BITS_VARY
-# define TARGET_PAGE_BITS_MIN 12
+# define TARGET_PAGE_BITS_MIN_SPECIFIC 12
 #endif
 
 #endif

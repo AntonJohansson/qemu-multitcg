@@ -16,7 +16,7 @@
 # define TARGET_PAGE_BITS 14
 #else
 # define TARGET_PAGE_BITS_VARY
-# define TARGET_PAGE_BITS_MIN 14
+# define TARGET_PAGE_BITS_MIN_SPECIFIC 14
 #endif
 
 #endif

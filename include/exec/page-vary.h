@@ -22,6 +22,7 @@
 
 typedef struct {
     bool decided;
+    int bits_min;
     int bits;
     uint64_t mask;
 } TargetPageBits;

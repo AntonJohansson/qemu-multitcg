@@ -16,7 +16,7 @@
 #define TARGET_PAGE_BITS 13
 #else
 #define TARGET_PAGE_BITS_VARY
-#define TARGET_PAGE_BITS_MIN 13
+#define TARGET_PAGE_BITS_MIN_SPECIFIC 13
 #endif
 
 #endif

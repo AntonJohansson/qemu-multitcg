@@ -44,8 +44,8 @@
 #endif
 #ifndef TARGET_PAGE_BITS
 # ifdef TARGET_PAGE_BITS_VARY
-#  ifndef TARGET_PAGE_BITS_MIN
-#   error TARGET_PAGE_BITS_MIN must be defined in cpu-param.h
+#  ifndef TARGET_PAGE_BITS_MIN_SPECIFIC
+#   error TARGET_PAGE_BITS_MIN_SPECIFIC must be defined in cpu-param.h
 #  endif
 # else
 #  error TARGET_PAGE_BITS must be defined in cpu-param.h

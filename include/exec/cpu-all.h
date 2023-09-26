@@ -159,8 +159,9 @@ extern const TargetPageBits target_page;
 #define TARGET_PAGE_MASK   ({ assert(target_page.decided); \
                               (target_long)target_page.mask; })
 #else
-#define TARGET_PAGE_BITS   target_page.bits
-#define TARGET_PAGE_MASK   ((target_long)target_page.mask)
+#define TARGET_PAGE_BITS_MIN target_page.bits_min
+#define TARGET_PAGE_BITS     target_page.bits
+#define TARGET_PAGE_MASK     ((target_long)target_page.mask)
 #endif
 #define TARGET_PAGE_SIZE   (-(int)TARGET_PAGE_MASK)
 #else
@@ -381,7 +382,8 @@ CPUArchState *cpu_copy(CPUArchState *env);
 #define TLB_SLOW_FLAGS_MASK  (TLB_BSWAP | TLB_WATCHPOINT)
 
 /* The two sets of flags must not overlap. */
-QEMU_BUILD_BUG_ON(TLB_FLAGS_MASK & TLB_SLOW_FLAGS_MASK);
+// TODO(anjo): Move to some function
+//QEMU_BUILD_BUG_ON(TLB_FLAGS_MASK & TLB_SLOW_FLAGS_MASK);
 
 /**
  * tlb_hit_page: return true if page aligned @addr is a hit against the

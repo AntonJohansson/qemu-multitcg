@@ -30,9 +30,9 @@
 #else
 # define TARGET_PAGE_BITS_VARY
 # ifdef TARGET_SPARC64
-#  define TARGET_PAGE_BITS_MIN 13 /* 8k */
+#  define TARGET_PAGE_BITS_MIN_SPECIFIC 13 /* 8k */
 # else
-#  define TARGET_PAGE_BITS_MIN 12 /* 4k */
+#  define TARGET_PAGE_BITS_MIN_SPECIFIC 12 /* 4k */
 # endif
 #endif
 

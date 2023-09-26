@@ -14,7 +14,7 @@
 #define TARGET_PAGE_BITS 13
 #else
 #define TARGET_PAGE_BITS_VARY
-#define TARGET_PAGE_BITS_MIN 13
+#define TARGET_PAGE_BITS_MIN_SPECIFIC 13
 #endif
 
 /* ??? EV4 has 34 phys addr bits, EV5 has 40, EV6 has 44.  */
