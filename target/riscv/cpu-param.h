@@ -18,12 +18,8 @@
 # define TARGET_VIRT_ADDR_SPACE_BITS 32 /* sv32 */
 #endif
 
-#ifdef CONFIG_USER_ONLY
-#define TARGET_PAGE_BITS 12 /* 4 KiB Pages */
-#else
 #define TARGET_PAGE_BITS_VARY
 #define TARGET_PAGE_BITS_MIN_SPECIFIC 12 /* 4 KiB Pages */
-#endif
 
 /*
  * The current MMU Modes are:

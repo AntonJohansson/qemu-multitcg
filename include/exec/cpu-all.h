@@ -149,20 +149,12 @@ static inline void stl_phys_notdirty(AddressSpace *as, hwaddr addr, uint32_t val
 #include "exec/memory_ldst_phys.h.inc"
 #endif
 
-/* Non-variable page size macros */
-#ifndef TARGET_PAGE_BITS_VARY
-#define TARGET_PAGE_BITS_MIN TARGET_PAGE_BITS
-#define TARGET_PAGE_SIZE   (1 << TARGET_PAGE_BITS)
-#define TARGET_PAGE_MASK   ((target_long)-1 << TARGET_PAGE_BITS)
-#define TARGET_PAGE_ALIGN(addr) ROUND_UP((addr), TARGET_PAGE_SIZE)
-#endif
-
 /* 
  * Check that softmmu targets are using variable page sizes, we need this
  * for the TARGET_PAGE_* macros to be target independent.
  */
-#if !defined(CONFIG_USER_ONLY) && !defined(TARGET_PAGE_BITS_VARY)
-# error Need to use TARGET_PAGE_BITS_VARY on system mode
+#if !defined(TARGET_PAGE_BITS_VARY)
+# error Need to use TARGET_PAGE_BITS_VARY for target-independent page macros
 #endif
 
 /* same as PROT_xxx */

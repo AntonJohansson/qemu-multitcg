@@ -6,6 +6,7 @@
 #ifndef CONFIG_USER_ONLY
 #include "exec/hwaddr.h"
 #endif
+#include "exec/page-vary.h"
 
 #define EXCP_INTERRUPT  0x10000 /* async interruption */
 #define EXCP_HLT        0x10001 /* hlt instruction reached */
@@ -33,8 +34,6 @@ typedef uint64_t vaddr;
  * these macros are target independent.  This is checked in
  * cpu-all.h.
  */
-#ifndef CONFIG_USER_ONLY
-# include "exec/page-vary.h"
 extern const TargetPageBits target_page;
 #ifdef CONFIG_DEBUG_TCG
 #define TARGET_PAGE_BITS_MIN ({ assert(target_page.decided); \
@@ -49,7 +48,6 @@ extern const TargetPageBits target_page;
 #endif
 #define TARGET_PAGE_SIZE   (-(int)TARGET_PAGE_MASK)
 #define TARGET_PAGE_ALIGN(addr) ROUND_UP((addr), TARGET_PAGE_SIZE)
-#endif
 
 void cpu_exec_init_all(void);
 void cpu_exec_step_atomic(CPUState *cpu);
