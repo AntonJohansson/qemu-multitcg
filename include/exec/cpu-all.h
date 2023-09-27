@@ -155,6 +155,8 @@ static inline void stl_phys_notdirty(AddressSpace *as, hwaddr addr, uint32_t val
 # include "exec/page-vary.h"
 extern const TargetPageBits target_page;
 #ifdef CONFIG_DEBUG_TCG
+#define TARGET_PAGE_BITS_MIN ({ assert(target_page.decided); \
+                                target_page.bits_min; })
 #define TARGET_PAGE_BITS   ({ assert(target_page.decided); target_page.bits; })
 #define TARGET_PAGE_MASK   ({ assert(target_page.decided); \
                               (target_long)target_page.mask; })
