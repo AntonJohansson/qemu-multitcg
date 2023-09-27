@@ -26,6 +26,31 @@ typedef uint64_t vaddr;
 #define VADDR_PRIX PRIX64
 #define VADDR_MAX UINT64_MAX
 
+/**
+ * Variable page size macros
+ *
+ * TARGET_PAGE_BITS_VARY is assumed for softmmu targets so
+ * these macros are target independent.  This is checked in
+ * cpu-all.h.
+ */
+#ifndef CONFIG_USER_ONLY
+# include "exec/page-vary.h"
+extern const TargetPageBits target_page;
+#ifdef CONFIG_DEBUG_TCG
+#define TARGET_PAGE_BITS_MIN ({ assert(target_page.decided); \
+                                target_page.bits_min; })
+#define TARGET_PAGE_BITS   ({ assert(target_page.decided); target_page.bits; })
+#define TARGET_PAGE_MASK   ({ assert(target_page.decided); \
+                              (int)target_page.mask; })
+#else
+#define TARGET_PAGE_BITS_MIN target_page.bits_min
+#define TARGET_PAGE_BITS     target_page.bits
+#define TARGET_PAGE_MASK     ((int)target_page.mask)
+#endif
+#define TARGET_PAGE_SIZE   (-(int)TARGET_PAGE_MASK)
+#define TARGET_PAGE_ALIGN(addr) ROUND_UP((addr), TARGET_PAGE_SIZE)
+#endif
+
 void cpu_exec_init_all(void);
 void cpu_exec_step_atomic(CPUState *cpu);
 
