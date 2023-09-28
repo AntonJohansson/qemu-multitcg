@@ -17,6 +17,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef EXEC_COMMON_H
+#define EXEC_COMMON_H
+
 #include "qemu/osdep.h"
 #include "hw/core/cpu.h"
 
@@ -359,3 +362,5 @@ static inline void tlb_flush_range_by_mmuidx_all_cpus_synced(CPUState *cpu,
 {
 }
 #endif
+
+#endif /* EXEC_COMMON_H */
