@@ -41,7 +41,7 @@
 #include "qemu/plugin-memory.h"
 #endif
 #include "tcg/tcg-ldst.h"
-#include "tcg/oversized-guest.h"
+#include "tcg-target-reg-bits.h"
 
 /* DEBUG defines, enable DEBUG_TLB_LOG to log to the CPU_LOG_MMU target */
 /* #define DEBUG_TLB */
@@ -812,12 +812,13 @@ void tlb_flush_range_by_mmuidx(CPUState *cpu, vaddr addr,
                                unsigned bits)
 {
     TLBFlushRangeData d;
+    const unsigned long_bits = (tcg_ctx->addr_type == TCG_TYPE_I32) ? 32 : 64;
 
     /*
      * If all bits are significant, and len is small,
      * this devolves to tlb_flush_page.
      */
-    if (bits >= TARGET_LONG_BITS && len <= TARGET_PAGE_SIZE) {
+    if (bits >= long_bits && len <= TARGET_PAGE_SIZE) {
         tlb_flush_page_by_mmuidx(cpu, addr, idxmap);
         return;
     }
@@ -855,12 +856,13 @@ void tlb_flush_range_by_mmuidx_all_cpus(CPUState *src_cpu,
 {
     TLBFlushRangeData d;
     CPUState *dst_cpu;
+    const unsigned long_bits = (tcg_ctx->addr_type == TCG_TYPE_I32) ? 32 : 64;
 
     /*
      * If all bits are significant, and len is small,
      * this devolves to tlb_flush_page.
      */
-    if (bits >= TARGET_LONG_BITS && len <= TARGET_PAGE_SIZE) {
+    if (bits >= long_bits && len <= TARGET_PAGE_SIZE) {
         tlb_flush_page_by_mmuidx_all_cpus(src_cpu, addr, idxmap);
         return;
     }
@@ -905,12 +907,13 @@ void tlb_flush_range_by_mmuidx_all_cpus_synced(CPUState *src_cpu,
 {
     TLBFlushRangeData d, *p;
     CPUState *dst_cpu;
+    const unsigned long_bits = (tcg_ctx->addr_type == TCG_TYPE_I32) ? 32 : 64;
 
     /*
      * If all bits are significant, and len is small,
      * this devolves to tlb_flush_page.
      */
-    if (bits >= TARGET_LONG_BITS && len <= TARGET_PAGE_SIZE) {
+    if (bits >= long_bits && len <= TARGET_PAGE_SIZE) {
         tlb_flush_page_by_mmuidx_all_cpus_synced(src_cpu, addr, idxmap);
         return;
     }
@@ -992,16 +995,19 @@ static void tlb_reset_dirty_range_locked(CPUTLBEntry *tlb_entry,
         addr &= TARGET_PAGE_MASK;
         addr += tlb_entry->addend;
         if ((addr - start) < length) {
-#if TARGET_LONG_BITS == 32
-            uint32_t *ptr_write = (uint32_t *)&tlb_entry->addr_write;
-            ptr_write += HOST_BIG_ENDIAN;
-            qatomic_set(ptr_write, *ptr_write | TLB_NOTDIRTY);
-#elif TCG_OVERSIZED_GUEST
-            tlb_entry->addr_write |= TLB_NOTDIRTY;
-#else
-            qatomic_set(&tlb_entry->addr_write,
-                        tlb_entry->addr_write | TLB_NOTDIRTY);
-#endif
+            if (tcg_ctx->addr_type == TCG_TYPE_I32) {
+                /* 32-bit */
+                uint32_t *ptr_write = (uint32_t *)&tlb_entry->addr_write;
+                ptr_write += HOST_BIG_ENDIAN;
+                qatomic_set(ptr_write, *ptr_write | TLB_NOTDIRTY);
+            } else if (TCG_TARGET_REG_BITS == 64) {
+                /* Oversized guest */
+                tlb_entry->addr_write |= TLB_NOTDIRTY;
+            } else {
+                /* 64-bit */
+                qatomic_set(&tlb_entry->addr_write,
+                            tlb_entry->addr_write | TLB_NOTDIRTY);
+            }
         }
     }
 }
