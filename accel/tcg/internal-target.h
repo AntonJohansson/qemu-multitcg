@@ -9,8 +9,9 @@
 #ifndef ACCEL_TCG_INTERNAL_TARGET_H
 #define ACCEL_TCG_INTERNAL_TARGET_H
 
-#include "exec/exec-all.h"
+#include "exec/exec-common.h"
 #include "exec/translate-all.h"
+#include "tcg/tcg.h"
 
 /*
  * Access to the various translations structures need to be serialised
@@ -108,12 +109,8 @@ extern bool one_insn_per_tb;
  *
  * This is a macro so that it's constant even without optimization.
  */
-#ifdef TCG_GUEST_DEFAULT_MO
-# define tcg_req_mo(type) \
-    ((type) & TCG_GUEST_DEFAULT_MO & ~TCG_TARGET_DEFAULT_MO)
-#else
-# define tcg_req_mo(type) ((type) & ~TCG_TARGET_DEFAULT_MO)
-#endif
+#define tcg_req_mo(type) \
+    ((type) & tcg_ctx->guest_mo & ~TCG_TARGET_DEFAULT_MO)
 
 /**
  * cpu_req_mo:

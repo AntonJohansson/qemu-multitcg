@@ -64,7 +64,14 @@
 
 #include "exec/memopidx.h"
 #include "qemu/int128.h"
+#if defined(CONFIG_USER_ONLY)
 #include "cpu.h"
+#else
+#include "qemu/typedefs.h"
+#include "exec/cpu-common.h"
+#include "exec/tlb-common.h"
+#include "tcg/tcg.h"
+#endif
 
 #if defined(CONFIG_USER_ONLY)
 /* sparc32plus has 64bit long but 32bit space address

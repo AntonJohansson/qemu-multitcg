@@ -19,8 +19,8 @@
 #ifndef TRANSLATE_ALL_H
 #define TRANSLATE_ALL_H
 
-#include "exec/exec-all.h"
-
+#include "exec/exec-common.h"
+#include "exec/translation-block.h"
 
 /* translate-all.c */
 void tb_invalidate_phys_page(tb_page_addr_t addr);

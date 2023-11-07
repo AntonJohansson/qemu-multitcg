@@ -1000,7 +1000,7 @@ static void tlb_reset_dirty_range_locked(CPUTLBEntry *tlb_entry,
                 uint32_t *ptr_write = (uint32_t *)&tlb_entry->addr_write;
                 ptr_write += HOST_BIG_ENDIAN;
                 qatomic_set(ptr_write, *ptr_write | TLB_NOTDIRTY);
-            } else if (TCG_TARGET_REG_BITS == 64) {
+            } else if (TCG_TARGET_REG_BITS == 32) {
                 /* Oversized guest */
                 tlb_entry->addr_write |= TLB_NOTDIRTY;
             } else {

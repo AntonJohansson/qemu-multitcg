@@ -67,7 +67,7 @@ DECLARE_INSTANCE_CHECKER(TCGState, TCG_STATE,
  * there is one remaining limitation to check:
  *   - The guest can't be oversized (e.g. 64 bit guest on 32 bit host)
  */
-
+#include "cpu.h"
 static bool default_mttcg_enabled(void)
 {
     if (icount_enabled() || TCG_OVERSIZED_GUEST) {

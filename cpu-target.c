@@ -35,6 +35,8 @@
 #include "sysemu/tcg.h"
 #include "exec/replay-core.h"
 #include "exec/cpu-common.h"
+
+#include "cpu.h" //TODO(anjo): Move into exec-all.h?, we removed it from there previously
 #include "exec/exec-all.h"
 #include "exec/tb-flush.h"
 #include "exec/translate-all.h"

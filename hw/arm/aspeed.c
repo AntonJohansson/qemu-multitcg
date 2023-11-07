@@ -30,6 +30,7 @@
 #include "qemu/units.h"
 #include "hw/qdev-clock.h"
 #include "sysemu/sysemu.h"
+#include "exec/cpu-system.h" // TODO(anjo): Should be included via some other header?
 
 static struct arm_boot_info aspeed_board_binfo = {
     .board_id = -1, /* device-tree-only board */

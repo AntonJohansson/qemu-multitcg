@@ -32,6 +32,7 @@
 #endif /* CONFIG_TCG */
 #include "internals.h"
 #include "exec/exec-all.h"
+#include "exec/cpu-system.h"
 #include "hw/qdev-properties.h"
 #if !defined(CONFIG_USER_ONLY)
 #include "hw/loader.h"

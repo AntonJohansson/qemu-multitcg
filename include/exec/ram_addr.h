@@ -20,11 +20,12 @@
 #define RAM_ADDR_H
 
 #ifndef CONFIG_USER_ONLY
-#include "cpu.h"
 #include "sysemu/xen.h"
 #include "sysemu/tcg.h"
 #include "exec/ramlist.h"
 #include "exec/ramblock.h"
+#include "exec/memory.h"
+#include "qemu/bitmap.h"
 
 extern uint64_t total_dirty_pages;
 
