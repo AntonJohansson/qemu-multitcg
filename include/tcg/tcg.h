@@ -492,6 +492,8 @@ struct TCGContext {
     int page_mask;
     uint8_t page_bits;
     uint8_t tlb_dyn_max_bits;
+    uint8_t tlb_dyn_min_bits;
+    uint8_t tlb_dyn_default_bits;
 #endif
     uint8_t insn_start_words;
     TCGBar guest_mo;
