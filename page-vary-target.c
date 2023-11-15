@@ -22,6 +22,7 @@
 #include "qemu/osdep.h"
 #include "exec/page-vary.h"
 #include "exec/exec-all.h"
+#include "cpu.h" // TODO(anjo): Just makee TARGET_PAGE_BITS_VARY default
 
 bool set_preferred_target_page_bits(int bits)
 {
