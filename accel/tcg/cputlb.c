@@ -172,7 +172,7 @@ static void tlb_mmu_resize_locked(CPUTLBDesc *desc, CPUTLBDescFast *fast,
     rate = desc->window_max_entries * 100 / old_size;
 
     if (rate > 70) {
-        new_size = MIN(old_size << 1, 1 << CPU_TLB_DYN_MAX_BITS);
+        new_size = MIN(old_size << 1, 1 << tcg_ctx->tlb_dyn_max_bits);
     } else if (rate < 30 && window_expired) {
         size_t ceil = pow2ceil(desc->window_max_entries);
         size_t expected_rate = desc->window_max_entries * 100 / ceil;
@@ -190,7 +190,7 @@ static void tlb_mmu_resize_locked(CPUTLBDesc *desc, CPUTLBDescFast *fast,
         if (expected_rate > 70) {
             ceil *= 2;
         }
-        new_size = MAX(ceil, 1 << CPU_TLB_DYN_MIN_BITS);
+        new_size = MAX(ceil, 1 << tcg_ctx->tlb_dyn_min_bits);
     }
 
     if (new_size == old_size) {
@@ -217,11 +217,11 @@ static void tlb_mmu_resize_locked(CPUTLBDesc *desc, CPUTLBDescFast *fast,
      * size, aborting if we cannot even allocate the smallest TLB we support.
      */
     while (fast->table == NULL || desc->fulltlb == NULL) {
-        if (new_size == (1 << CPU_TLB_DYN_MIN_BITS)) {
+        if (new_size == (1 << tcg_ctx->tlb_dyn_min_bits)) {
             error_report("%s: %s", __func__, strerror(errno));
             abort();
         }
-        new_size = MAX(new_size >> 1, 1 << CPU_TLB_DYN_MIN_BITS);
+        new_size = MAX(new_size >> 1, 1 << tcg_ctx->tlb_dyn_min_bits);
         fast->mask = (new_size - 1) << CPU_TLB_ENTRY_BITS;
 
         g_free(fast->table);
@@ -253,7 +253,7 @@ static void tlb_flush_one_mmuidx_locked(CPUState *cpu, int mmu_idx,
 
 static void tlb_mmu_init(CPUTLBDesc *desc, CPUTLBDescFast *fast, int64_t now)
 {
-    size_t n_entries = 1 << CPU_TLB_DYN_DEFAULT_BITS;
+    size_t n_entries = 1 << tcg_ctx->tlb_dyn_default_bits;
 
     tlb_window_reset(desc, now, 0);
     desc->n_used_entries = 0;
@@ -2384,7 +2384,7 @@ static uint64_t do_ld_8(CPUState *cpu, MMULookupPageData *p, int mmu_idx,
     return ret;
 }
 
-static uint8_t do_ld1_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
+uint8_t do_ld1_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
                           uintptr_t ra, MMUAccessType access_type)
 {
     MMULookupLocals l;
@@ -2397,7 +2397,7 @@ static uint8_t do_ld1_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
     return do_ld_1(cpu, &l.page[0], l.mmu_idx, access_type, ra);
 }
 
-static uint16_t do_ld2_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
+uint16_t do_ld2_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
                            uintptr_t ra, MMUAccessType access_type)
 {
     MMULookupLocals l;
@@ -2422,7 +2422,7 @@ static uint16_t do_ld2_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
     return ret;
 }
 
-static uint32_t do_ld4_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
+uint32_t do_ld4_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
                            uintptr_t ra, MMUAccessType access_type)
 {
     MMULookupLocals l;
@@ -2443,7 +2443,7 @@ static uint32_t do_ld4_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
     return ret;
 }
 
-static uint64_t do_ld8_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
+uint64_t do_ld8_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
                            uintptr_t ra, MMUAccessType access_type)
 {
     MMULookupLocals l;
@@ -2973,30 +2973,6 @@ static void do_st16_mmu(CPUState *cpu, vaddr addr, Int128 val,
 #endif
 
 /* Code access functions.  */
-
-uint32_t cpu_ldub_code(CPUArchState *env, abi_ptr addr)
-{
-    MemOpIdx oi = make_memop_idx(MO_UB, cpu_mmu_index(env, true));
-    return do_ld1_mmu(env_cpu(env), addr, oi, 0, MMU_INST_FETCH);
-}
-
-uint32_t cpu_lduw_code(CPUArchState *env, abi_ptr addr)
-{
-    MemOpIdx oi = make_memop_idx(MO_TEUW, cpu_mmu_index(env, true));
-    return do_ld2_mmu(env_cpu(env), addr, oi, 0, MMU_INST_FETCH);
-}
-
-uint32_t cpu_ldl_code(CPUArchState *env, abi_ptr addr)
-{
-    MemOpIdx oi = make_memop_idx(MO_TEUL, cpu_mmu_index(env, true));
-    return do_ld4_mmu(env_cpu(env), addr, oi, 0, MMU_INST_FETCH);
-}
-
-uint64_t cpu_ldq_code(CPUArchState *env, abi_ptr addr)
-{
-    MemOpIdx oi = make_memop_idx(MO_TEUQ, cpu_mmu_index(env, true));
-    return do_ld8_mmu(env_cpu(env), addr, oi, 0, MMU_INST_FETCH);
-}
 
 uint8_t cpu_ldb_code_mmu(CPUArchState *env, abi_ptr addr,
                          MemOpIdx oi, uintptr_t retaddr)
