@@ -49,21 +49,6 @@ struct TCGCPUOps {
     /** @debug_excp_handler: Callback for handling debug exceptions */
     void (*debug_excp_handler)(CPUState *cpu);
 
-#ifdef NEED_CPU_H
-#if defined(CONFIG_USER_ONLY) && defined(TARGET_I386)
-    /**
-     * @fake_user_interrupt: Callback for 'fake exception' handling.
-     *
-     * Simulate 'fake exception' which will be handled outside the
-     * cpu execution loop (hack for x86 user mode).
-     */
-    void (*fake_user_interrupt)(CPUState *cpu);
-#else
-    /**
-     * @do_interrupt: Callback for interrupt handling.
-     */
-    void (*do_interrupt)(CPUState *cpu);
-#endif /* !CONFIG_USER_ONLY || !TARGET_I386 */
 #ifdef CONFIG_USER_ONLY
     /**
      * record_sigsegv:
@@ -171,7 +156,24 @@ struct TCGCPUOps {
     bool (*io_recompile_replay_branch)(CPUState *cpu,
                                        const TranslationBlock *tb);
 #endif /* !CONFIG_USER_ONLY */
+
+#ifdef NEED_CPU_H
+#if defined(CONFIG_USER_ONLY) && defined(TARGET_I386)
+    /**
+     * @fake_user_interrupt: Callback for 'fake exception' handling.
+     *
+     * Simulate 'fake exception' which will be handled outside the
+     * cpu execution loop (hack for x86 user mode).
+     */
+    void (*fake_user_interrupt)(CPUState *cpu);
+#else
+    /**
+     * @do_interrupt: Callback for interrupt handling.
+     */
+    void (*do_interrupt)(CPUState *cpu);
+#endif /* !CONFIG_USER_ONLY || !TARGET_I386 */
 #endif /* NEED_CPU_H */
+
 
 };
 
