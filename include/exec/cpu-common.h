@@ -146,6 +146,17 @@ void cpu_list_lock(void);
 void cpu_list_unlock(void);
 unsigned int cpu_list_generation_id_get(void);
 
+//TODO(anjo): Move?
+/**
+ * cpu_mmu_index:
+ * @env: The cpu environment
+ * @ifetch: True for code access, false for data access.
+ *
+ * Return the core mmu index for the current translation regime.
+ * This function is used by generic TCG code paths.
+ */
+int cpu_mmu_index(CPUArchState *env, bool ifetch);
+
 void tcg_flush_softmmu_tlb(CPUState *cs);
 void tcg_flush_jmp_cache(CPUState *cs);
 
