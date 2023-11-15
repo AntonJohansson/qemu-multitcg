@@ -1233,19 +1233,7 @@ uint32_t cpu_rddsp(uint32_t mask_num, CPUMIPSState *env);
  */
 #define MMU_USER_IDX 2
 
-static inline int hflags_mmu_index(uint32_t hflags)
-{
-    if (hflags & MIPS_HFLAG_ERL) {
-        return 3; /* ERL */
-    } else {
-        return hflags & MIPS_HFLAG_KSU;
-    }
-}
-
-static inline int cpu_mmu_index(CPUMIPSState *env, bool ifetch)
-{
-    return hflags_mmu_index(env->hflags);
-}
+int hflags_mmu_index(uint32_t hflags);
 
 #include "exec/cpu-all.h"
 

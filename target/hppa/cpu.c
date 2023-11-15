@@ -28,6 +28,18 @@
 #include "fpu/softfloat.h"
 #include "tcg/tcg.h"
 
+int cpu_mmu_index(CPUHPPAState *env, bool ifetch)
+{
+#ifdef CONFIG_USER_ONLY
+    return MMU_USER_IDX;
+#else
+    if (env->psw & (ifetch ? PSW_C : PSW_D)) {
+        return PRIV_TO_MMU_IDX(env->iaoq_f & 3);
+    }
+    return MMU_PHYS_IDX;  /* mmu disabled */
+#endif
+}
+
 static void hppa_cpu_set_pc(CPUState *cs, vaddr value)
 {
     HPPACPU *cpu = HPPA_CPU(cs);

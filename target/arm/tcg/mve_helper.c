@@ -24,6 +24,7 @@
 #include "exec/helper-proto.h"
 #include "exec/cpu_ldst.h"
 #include "exec/exec-all.h"
+#include "exec/cpu_ldst-specific.h"
 #include "tcg/tcg.h"
 #include "fpu/softfloat.h"
 

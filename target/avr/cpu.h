@@ -172,12 +172,6 @@ static inline void set_avr_feature(CPUAVRState *env, int feature)
 }
 
 #define cpu_list avr_cpu_list
-#define cpu_mmu_index avr_cpu_mmu_index
-
-static inline int avr_cpu_mmu_index(CPUAVRState *env, bool ifetch)
-{
-    return ifetch ? MMU_CODE_IDX : MMU_DATA_IDX;
-}
 
 void avr_cpu_tcg_init(void);
 

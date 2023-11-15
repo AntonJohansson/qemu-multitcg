@@ -18,6 +18,7 @@
 #include "exec/cpu-system.h"
 #ifdef CONFIG_TCG
 #include "exec/cpu_ldst.h"
+#include "exec/cpu_ldst-specific.h"
 #include "semihosting/common-semi.h"
 #endif
 #if !defined(CONFIG_USER_ONLY)

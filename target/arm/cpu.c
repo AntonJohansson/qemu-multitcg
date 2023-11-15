@@ -49,6 +49,11 @@
 #include "fpu/softfloat.h"
 #include "cpregs.h"
 
+int cpu_mmu_index(CPUARMState *env, bool ifetch)
+{
+    return EX_TBFLAG_ANY(env->hflags, MMUIDX);
+}
+
 static void arm_cpu_set_pc(CPUState *cs, vaddr value)
 {
     ARMCPU *cpu = ARM_CPU(cs);
