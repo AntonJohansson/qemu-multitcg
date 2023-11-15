@@ -45,7 +45,7 @@
 #include "qemu/qemu-print.h"
 #include "qemu/log.h"
 #include "qemu/memalign.h"
-#include "exec/memory.h"
+#include "exec/cpu-system.h" // TODO(anjo): Should be included via some other header?
 #include "exec/ioport.h"
 #include "sysemu/dma.h"
 #include "sysemu/hostmem.h"

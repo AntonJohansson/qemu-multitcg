@@ -10,6 +10,7 @@
 #include "qemu/osdep.h"
 #include "qemu/log.h"
 #include "qemu/error-report.h"
+#include "cpu.h"
 #include "exec/exec-all.h"
 #include "exec/translator.h"
 #include "exec/plugin-gen.h"

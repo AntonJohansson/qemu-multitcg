@@ -20,7 +20,6 @@
 #ifndef EXEC_TB_HASH_H
 #define EXEC_TB_HASH_H
 
-#include "exec/cpu-defs.h"
 #include "exec/exec-common.h"
 #include "exec/translation-block.h"
 #include "qemu/xxhash.h"

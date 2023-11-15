@@ -25,6 +25,7 @@
 #include "exec/exec-all.h"
 #include "exec/tb-flush.h"
 #include "exec/translate-all.h"
+#include "exec/cpu-defs.h" // TODO(anjo): Remove?
 #include "sysemu/tcg.h"
 #include "tcg/tcg.h"
 #include "tb-hash.h"
