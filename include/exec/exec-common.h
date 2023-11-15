@@ -23,6 +23,18 @@
 #include "qemu/osdep.h"
 #include "hw/core/cpu.h"
 
+
+#include "exec/memop.h"
+#include "exec/memopidx.h"
+uint8_t do_ld1_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
+                          uintptr_t ra, MMUAccessType access_type);
+uint16_t do_ld2_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
+                           uintptr_t ra, MMUAccessType access_type);
+uint32_t do_ld4_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
+                           uintptr_t ra, MMUAccessType access_type);
+uint64_t do_ld8_mmu(CPUState *cpu, vaddr addr, MemOpIdx oi,
+                           uintptr_t ra, MMUAccessType access_type);
+
 /**
  * cpu_loop_exit_requested:
  * @cpu: The CPU state to be tested
